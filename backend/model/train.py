@@ -42,14 +42,14 @@ def train_for_location(location: str) -> dict:
 
     x = np.load(x_path)
     y = np.load(y_path)
-    if len(x) < 40:
-        raise ValueError(f"Not enough samples for {location}; need >= 40, got {len(x)}")
+    if len(x) < 5:
+        raise ValueError(f"Not enough samples for {location}; need >= 5, got {len(x)}")
 
     x_train, x_test, y_train, y_test = train_test_split(
         x, y, test_size=0.2, random_state=42, shuffle=True
     )
 
-    model = build_model(input_shape=(12, 4))
+    model = build_model(input_shape=(3, 4))
     model.fit(x_train, y_train, epochs=50, batch_size=32, verbose=0, validation_split=0.1)
 
     preds = model.predict(x_test, verbose=0).reshape(-1)

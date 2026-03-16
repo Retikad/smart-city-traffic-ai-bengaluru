@@ -1,5 +1,7 @@
 import React from "react";
-import { Box, Card, CardContent, Chip, Typography } from "@mui/material";
+import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+import { CircleMarker, MapContainer, Polyline, TileLayer, Tooltip } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const CORRIDORS = [
   { name: "MG Road", lat: 12.9757, lng: 77.6011 },
@@ -9,21 +11,37 @@ const CORRIDORS = [
   { name: "Hebbal Flyover", lat: 13.035, lng: 77.597 }
 ];
 
-function normalize(value, min, max, outMin, outMax) {
-  if (max === min) return (outMin + outMax) / 2;
-  return outMin + ((value - min) / (max - min)) * (outMax - outMin);
+function markerColor(ci) {
+  if (ci >= 0.75) return "#d62828";
+  if (ci >= 0.5) return "#e07a5f";
+  if (ci >= 0.25) return "#f4a261";
+  return "#2a9d8f";
 }
 
-function LiveMap({ selectedLocation }) {
-  const latVals = CORRIDORS.map((c) => c.lat);
-  const lngVals = CORRIDORS.map((c) => c.lng);
-  const minLat = Math.min(...latVals);
-  const maxLat = Math.max(...latVals);
-  const minLng = Math.min(...lngVals);
-  const maxLng = Math.max(...lngVals);
+function markerRadius(ci, active) {
+  const base = 6 + ci * 10;
+  return active ? base + 3 : base;
+}
+
+function LiveMap({ selectedLocation, liveItems = [] }) {
+  const enrichedCorridors = CORRIDORS.map((corridor) => {
+    const live = liveItems.find((item) => item.location_name === corridor.name);
+    return {
+      ...corridor,
+      congestion_index: live?.congestion_index ?? 0,
+      current_speed: live?.current_speed ?? null
+    };
+  });
+
+  const routePath = CORRIDORS.map((corridor) => [corridor.lat, corridor.lng]);
 
   return (
-    <Card sx={{ mt: 2 }}>
+    <Card
+      sx={{
+        mt: 2,
+        background: "linear-gradient(155deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.94) 100%)"
+      }}
+    >
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Bengaluru Corridor Map
@@ -31,36 +49,56 @@ function LiveMap({ selectedLocation }) {
         <Box
           sx={{
             position: "relative",
-            height: 220,
+            height: 320,
             borderRadius: 2,
             overflow: "hidden",
-            background:
-              "radial-gradient(circle at 20% 20%, rgba(255, 203, 107, 0.7), rgba(15, 76, 92, 0.2)), linear-gradient(135deg, #fefae0 0%, #faedcd 100%)"
+            border: "1px solid rgba(15, 23, 42, 0.12)"
           }}
         >
-          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
-                <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(15,76,92,0.15)" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect x="0" y="0" width="100" height="100" fill="url(#grid)" />
-            {CORRIDORS.map((corridor) => {
-              const x = normalize(corridor.lng, minLng, maxLng, 15, 85);
-              const y = normalize(corridor.lat, minLat, maxLat, 85, 15);
+          <MapContainer center={[12.9716, 77.5946]} zoom={11} scrollWheelZoom style={{ height: "100%", width: "100%" }}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            <Polyline positions={routePath} pathOptions={{ color: "#0b2447", weight: 3, opacity: 0.5, dashArray: "5 7" }} />
+
+            {enrichedCorridors.map((corridor) => {
               const active = corridor.name === selectedLocation;
+              const ci = corridor.congestion_index;
               return (
-                <g key={corridor.name}>
-                  <circle cx={x} cy={y} r={active ? 3.4 : 2.4} fill={active ? "#e36414" : "#0f4c5c"} />
-                  <text x={x + 1.8} y={y - 1.8} fontSize="2.8" fill="#1f2937">
-                    {corridor.name}
-                  </text>
-                </g>
+                <CircleMarker
+                  key={corridor.name}
+                  center={[corridor.lat, corridor.lng]}
+                  radius={markerRadius(ci, active)}
+                  pathOptions={{
+                    color: active ? "#111827" : "#ffffff",
+                    weight: active ? 3 : 1.5,
+                    fillColor: markerColor(ci),
+                    fillOpacity: 0.86
+                  }}
+                >
+                  <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                    <div>
+                      <strong>{corridor.name}</strong>
+                      <br />
+                      Congestion: {(ci * 100).toFixed(1)}%
+                      <br />
+                      Speed: {corridor.current_speed !== null ? `${corridor.current_speed.toFixed(1)} km/h` : "N/A"}
+                    </div>
+                  </Tooltip>
+                </CircleMarker>
               );
             })}
-          </svg>
+          </MapContainer>
         </Box>
-        <Chip sx={{ mt: 1.5 }} color="secondary" label={`Focused: ${selectedLocation}`} />
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+          <Chip sx={{ fontWeight: 600 }} color="secondary" label={`Focused: ${selectedLocation}`} />
+          <Chip size="small" label="Low" sx={{ bgcolor: "#2a9d8f", color: "#fff" }} />
+          <Chip size="small" label="Medium" sx={{ bgcolor: "#f4a261", color: "#1f2937" }} />
+          <Chip size="small" label="High" sx={{ bgcolor: "#e07a5f", color: "#fff" }} />
+          <Chip size="small" label="Severe" sx={{ bgcolor: "#d62828", color: "#fff" }} />
+        </Stack>
       </CardContent>
     </Card>
   );

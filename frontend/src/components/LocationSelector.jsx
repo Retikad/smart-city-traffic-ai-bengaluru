@@ -3,7 +3,11 @@ import { Card, CardContent, FormControl, InputLabel, MenuItem, Select, Typograph
 
 function LocationSelector({ locations, selectedLocation, onChange }) {
   return (
-    <Card>
+    <Card
+      sx={{
+        background: "linear-gradient(145deg, rgba(255,255,255,0.97) 0%, rgba(240,247,255,0.94) 100%)"
+      }}
+    >
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Corridor Selection

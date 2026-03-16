@@ -3,24 +3,41 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     mode: "light",
-    primary: { main: "#0f4c5c" },
-    secondary: { main: "#e36414" },
-    success: { main: "#2f9e44" },
-    warning: { main: "#f08c00" },
-    error: { main: "#c92a2a" },
-    background: { default: "#f4f1ea", paper: "#fffaf0" }
+    primary: { main: "#0b2447" },
+    secondary: { main: "#e07a5f" },
+    success: { main: "#2a9d8f" },
+    warning: { main: "#f4a261" },
+    error: { main: "#d62828" },
+    background: { default: "#fbf9f4", paper: "#ffffff" }
   },
   typography: {
-    fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-    h5: { fontWeight: 700 },
-    h6: { fontWeight: 600 }
+    fontFamily: "'Sora', 'Segoe UI', sans-serif",
+    h4: { fontFamily: "'Space Grotesk', 'Sora', sans-serif", fontWeight: 700 },
+    h5: { fontFamily: "'Space Grotesk', 'Sora', sans-serif", fontWeight: 700 },
+    h6: { fontFamily: "'Space Grotesk', 'Sora', sans-serif", fontWeight: 600 },
+    overline: { fontWeight: 600 }
   },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 14,
-          boxShadow: "0 10px 25px rgba(15, 76, 92, 0.08)"
+          borderRadius: 16,
+          border: "1px solid rgba(15, 23, 42, 0.08)",
+          boxShadow: "0 16px 40px rgba(11, 36, 71, 0.08)"
+        }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10
+        }
+      }
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: "none"
         }
       }
     }

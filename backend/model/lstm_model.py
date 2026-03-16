@@ -5,7 +5,7 @@ from __future__ import annotations
 from tensorflow import keras
 
 
-def build_model(input_shape: tuple[int, int] = (12, 4)) -> keras.Model:
+def build_model(input_shape: tuple[int, int] = (3, 4)) -> keras.Model:
     """Create and compile the required LSTM architecture."""
     model = keras.Sequential(
         [

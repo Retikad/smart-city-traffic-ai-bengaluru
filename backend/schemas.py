@@ -58,10 +58,10 @@ class ProcessedHistoryResponse(BaseModel):
 
 
 class PredictRequest(BaseModel):
-    """Prediction request with a fixed 12-step sequence of 4 features."""
+    """Prediction request with a fixed 3-step sequence of 4 features."""
 
     location: str
-    sequence: List[List[float]] = Field(min_length=12, max_length=12)
+    sequence: List[List[float]] = Field(min_length=3, max_length=3)
 
 
 class PredictResponse(BaseModel):

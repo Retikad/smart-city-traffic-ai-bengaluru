@@ -10,8 +10,8 @@ import pandas as pd
 
 from database import ProcessedTraffic, RawTraffic, SessionLocal, init_db
 
-SEQUENCE_LEN = 12
-FEATURE_COLUMNS = ["norm_speed", "norm_congestion", "hour_sin", "hour_cos"]
+SEQUENCE_LEN = 3
+FEATURE_COLUMNS = ["norm_speed", "avg_congestion_index", "hour_sin", "hour_cos"]
 
 
 def _label(ci: float) -> str:
@@ -31,7 +31,7 @@ def _to_sequences(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     y_rows: list[float] = []
 
     feats = df[FEATURE_COLUMNS].to_numpy(dtype=np.float32)
-    target = df["norm_congestion"].to_numpy(dtype=np.float32)
+    target = df["avg_congestion_index"].to_numpy(dtype=np.float32)
 
     for idx in range(SEQUENCE_LEN, len(df)):
         x_rows.append(feats[idx - SEQUENCE_LEN : idx])
@@ -76,7 +76,7 @@ def run_preprocess() -> None:
 
         for location, gdf in df.groupby("location_name"):
             loc = gdf.set_index("timestamp").sort_index()
-            agg = loc.resample("15min").agg(
+            agg = loc.resample("5min").agg(
                 avg_speed=("current_speed", "mean"),
                 min_speed=("current_speed", "min"),
                 max_speed=("current_speed", "max"),
@@ -88,7 +88,7 @@ def run_preprocess() -> None:
             if agg.empty:
                 continue
 
-            agg["window_end"] = agg["window_start"] + pd.Timedelta(minutes=15)
+            agg["window_end"] = agg["window_start"] + pd.Timedelta(minutes=5)
 
             speed_min = float(agg["avg_speed"].min())
             speed_max = float(agg["avg_speed"].max())

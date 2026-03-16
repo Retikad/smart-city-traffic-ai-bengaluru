@@ -38,11 +38,13 @@ def _build_initial_vector(congestion_index: float, speed: float, hour: int) -> n
     )
 
 
-def _dominant_driver(final_vec: np.ndarray) -> Tuple[str, int]:
-    """Select dominant cause excluding target node congestion_level itself."""
+def _dominant_driver(final_vec: np.ndarray) -> Tuple[str, int, float]:
+    """Select dominant driver by signed contribution into congestion_level node."""
     candidate_indices = [0, 1, 2, 3, 5]
-    idx = max(candidate_indices, key=lambda i: final_vec[i])
-    return CONCEPTS[idx], idx
+    # Contribution to congestion node is concept activation times its causal weight.
+    contributions = {i: float(final_vec[i] * WEIGHT_MATRIX[i, 4]) for i in candidate_indices}
+    idx = max(candidate_indices, key=lambda i: contributions[i])
+    return CONCEPTS[idx], idx, contributions[idx]
 
 
 def explain(location: str, congestion_index: float, speed: float, hour: int) -> FCMResult:
@@ -56,17 +58,21 @@ def explain(location: str, congestion_index: float, speed: float, hour: int) -> 
             break
         state = updated
 
-    dominant_name, dominant_idx = _dominant_driver(state)
+    dominant_name, dominant_idx, dominant_contribution = _dominant_driver(state)
     vector = {name: round(float(val), 4) for name, val in zip(CONCEPTS, state)}
+
+    speed_contribution = float(state[1] * WEIGHT_MATRIX[1, 4])
+    delay_contribution = float(state[5] * WEIGHT_MATRIX[5, 4])
+    dominant_effect = "increases" if dominant_contribution >= 0 else "reduces"
 
     explanation = (
         f"{location} shows predicted congestion index {congestion_index:.2f}. "
-        f"The FCM indicates {dominant_name.replace('_', ' ')} as the strongest contributor, "
+        f"The FCM indicates {dominant_name.replace('_', ' ')} as the strongest factor and it {dominant_effect} congestion, "
         f"with congestion level activation {state[4]:.2f}. "
-        f"Vehicle speed influence is {state[1]:.2f} and travel-time delay influence is {state[5]:.2f}."
+        f"Vehicle speed contribution is {speed_contribution:+.2f} and travel-time delay contribution is {delay_contribution:+.2f}."
     )
 
-    if dominant_idx == 0 and hour in range(7, 11) or hour in range(16, 21):
+    if dominant_idx == 0 and (hour in range(7, 11) or hour in range(16, 21)):
         explanation += " This pattern is consistent with Bengaluru peak-hour density pressure."
 
     return FCMResult(vector=vector, dominant_cause=dominant_name, explanation=explanation)
