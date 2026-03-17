@@ -5,6 +5,7 @@ A full-stack AI system for Bengaluru that:
 - Predicts short-term congestion using a location-wise LSTM model.
 - Explains predictions via a Fuzzy Cognitive Map (FCM).
 - Visualizes live, historical, predictive, and explainable insights in a React dashboard.
+- Shows live corridor status on an OpenStreetMap-based map UI.
 
 ## Monitored Corridors
 - MG Road (12.9757, 77.6011)
@@ -18,54 +19,85 @@ A full-stack AI system for Bengaluru that:
 2. Node.js 18+
 3. npm
 
-## Backend Setup
-1. Open a terminal and move to backend:
+## Quick Start (Windows)
+
+### 1) Backend Setup
+Open a terminal and move to backend:
 
 ```powershell
 cd smart_traffic\backend
 ```
 
-2. Create and activate a virtual environment:
+Create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-3. Install Python dependencies:
+Install Python dependencies:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-4. Create environment file:
+Create environment file:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-5. Set your TomTom API key in `.env`.
+Set your TomTom API key in `.env`.
 
-6. Initialize DB tables:
+Initialize DB tables:
 
 ```powershell
 python database.py
 ```
 
-## Data Pipeline
-1. Start ingestion loop (polls every 300 seconds by default):
+Start the API server:
+
+```powershell
+uvicorn main:app --reload --port 8000
+```
+
+Start the ingestion loop in another terminal (same backend folder):
 
 ```powershell
 python ingest.py
 ```
 
-2. Preprocess into 15-minute windows and export training arrays:
+Current defaults (from `.env`):
+- `POLL_INTERVAL=60` (new pull every 60 seconds)
+- `INGEST_BATCH_MULTIPLIER=12` (multiple snapshots per cycle)
+- `SNAPSHOT_SPACING_SECONDS=0`
+
+### 2) Frontend Setup
+Open another terminal:
+
+```powershell
+cd smart_traffic\frontend
+Copy-Item .env.example .env
+npm install
+npm start
+```
+
+Frontend runs on http://localhost:3000 and calls FastAPI at `REACT_APP_API_BASE` (default: `http://localhost:8000`).
+
+### 3) Verify Services
+- Health check: http://localhost:8000/health
+- API docs (Swagger): http://localhost:8000/docs
+- Dashboard: http://localhost:3000
+
+## Model Pipeline
+
+1. Preprocess raw traffic into 5-minute windows and export training arrays:
 
 ```powershell
 python preprocess.py
 ```
 
-3. Train one LSTM model per location:
+2. Train one LSTM model per location:
 
 ```powershell
 python model/train.py
@@ -76,45 +108,14 @@ Training prints per-location evaluation:
 - RMSE
 - Comparison table: LSTM vs naive last-value baseline
 
-## Run API
-From `smart_traffic/backend`:
-
-```powershell
-uvicorn main:app --reload --port 8000
-```
-
-- Health check: http://localhost:8000/health
-- Swagger docs: http://localhost:8000/docs
-
-## Frontend Setup
-1. Open another terminal and move to frontend:
-
-```powershell
-cd smart_traffic\frontend
-```
-
-2. Create environment file:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-3. Install and run:
-
-```powershell
-npm install
-npm start
-```
-
-Frontend runs on http://localhost:3000 and calls FastAPI at `REACT_APP_API_BASE`.
-
 ## API Summary
 - `GET /traffic/live`
   - Latest raw traffic readings for all 5 locations.
 - `GET /traffic/history?location=MG+Road&hours=24`
-  - Processed records for selected location and time window.
+  - Rolling, gap-filled 5-minute records for selected location and time window.
 - `POST /predict`
-  - Body: `{ "location": "MG Road", "sequence": [[...], ...] }`
+  - Body: `{ "location": "MG Road", "sequence": [[...], [...], [...]] }`
+  - Sequence shape is fixed to 3 timesteps x 4 features.
   - Returns congestion index, label, confidence.
 - `POST /explain`
   - Body: `{ "location": "MG Road", "congestion_index": 0.72, "speed": 18.5, "hour": 17 }`
@@ -125,4 +126,5 @@ Frontend runs on http://localhost:3000 and calls FastAPI at `REACT_APP_API_BASE`
 ## Notes
 - SQLite DB file path is controlled by `DATABASE_URL` (default: `sqlite:///./bengaluru_traffic.db`).
 - Saved model directory is controlled by `MODEL_DIR` (default: `model/saved_model`).
+- Frontend refresh interval is configurable via `REACT_APP_DASHBOARD_REFRESH_MS` (default: 60000 ms).
 - Never hardcode API keys in source; keep them only in `.env`.
