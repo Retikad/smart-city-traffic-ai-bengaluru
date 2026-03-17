@@ -30,7 +30,7 @@ const DEFAULT_LOCATIONS = [
   "Hebbal Flyover"
 ];
 
-const DASHBOARD_REFRESH_MS = Number(process.env.REACT_APP_DASHBOARD_REFRESH_MS || 1800000);
+const DASHBOARD_REFRESH_MS = Number(process.env.REACT_APP_DASHBOARD_REFRESH_MS || 60000);
 
 function labelColor(ci) {
   if (ci < 0.25) return "success";

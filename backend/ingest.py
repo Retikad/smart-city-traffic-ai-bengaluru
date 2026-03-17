@@ -13,7 +13,7 @@ import requests
 
 from database import CORRIDORS, RawTraffic, SessionLocal, init_db
 
-load_dotenv()
+load_dotenv(override=True)
 
 TOMTOM_URL = "https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json"
 API_KEY = os.getenv("TOMTOM_API_KEY", "")
