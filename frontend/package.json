@@ -1,6 +1,7 @@
 {
   "name": "bengaluru-smart-traffic-frontend",
   "version": "1.0.0",
+  "homepage": "https://retikad.github.io/smart-city-traffic-ai-bengaluru",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.3",

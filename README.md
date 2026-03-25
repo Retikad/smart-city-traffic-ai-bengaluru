@@ -84,6 +84,23 @@ npm start
 
 Frontend runs on http://localhost:3000 and calls FastAPI at `REACT_APP_API_BASE` (default: `http://localhost:8000`).
 
+## Frontend Deployment (GitHub Pages)
+
+This repo is configured to auto-deploy the React frontend using GitHub Actions.
+
+1. Push the latest code to the `main` branch.
+2. In GitHub, open your repository settings:
+  - `Settings` -> `Pages`
+  - Under `Build and deployment`, set `Source` to `GitHub Actions`.
+3. The workflow `.github/workflows/deploy-frontend-pages.yml` will:
+  - install dependencies from `smart_traffic/frontend`
+  - build the app
+  - publish `smart_traffic/frontend/build` to GitHub Pages
+
+After the workflow succeeds, your frontend will be available at:
+
+https://retikad.github.io/smart-city-traffic-ai-bengaluru/
+
 ### 3) Verify Services
 - Health check: http://localhost:8000/health
 - API docs (Swagger): http://localhost:8000/docs
