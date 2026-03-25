@@ -27,8 +27,14 @@ jobs:
         with:
           node-version: 20
 
+      - name: Verify frontend directory
+        run: |
+          ls -la
+          ls -la frontend
+
       - name: Install dependencies
-        run: npm --prefix frontend ci
+        run: |
+          npm --prefix frontend ci || npm --prefix frontend install --no-audit --no-fund
 
       - name: Build frontend
         run: npm --prefix frontend run build
