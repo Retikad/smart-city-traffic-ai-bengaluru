@@ -108,6 +108,27 @@ For backend CORS, include your frontend origin in backend `.env`:
 
 `CORS_ALLOW_ORIGINS=http://localhost:3000,https://retikad.github.io`
 
+## Backend Deployment (Render)
+
+This repo now includes a Render blueprint file at `render.yaml` with:
+- a web service for FastAPI (`smart-traffic-api`)
+- a worker service for ingestion (`smart-traffic-ingest`)
+
+Steps:
+1. Go to Render and choose `New` -> `Blueprint`.
+2. Connect this GitHub repository.
+3. Render will detect `render.yaml` and propose both services.
+4. Set required env var `TOMTOM_API_KEY` in Render before first deploy.
+5. Deploy.
+
+After deployment, your backend URL is the web service URL shown in Render for `smart-traffic-api`, for example:
+
+`https://smart-traffic-api.onrender.com`
+
+Use that URL for:
+- GitHub variable `REACT_APP_API_BASE`
+- health check: `https://smart-traffic-api.onrender.com/health`
+
 ### 3) Verify Services
 - Health check: http://localhost:8000/health
 - API docs (Swagger): http://localhost:8000/docs

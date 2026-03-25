@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: smart-traffic-api
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TOMTOM_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///./bengaluru_traffic.db
+      - key: MODEL_DIR
+        value: model/saved_model
+      - key: POLL_INTERVAL
+        value: "60"
+      - key: CORS_ALLOW_ORIGINS
+        value: http://localhost:3000,https://retikad.github.io
+
+  - type: worker
+    name: smart-traffic-ingest
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python ingest.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TOMTOM_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///./bengaluru_traffic.db
+      - key: MODEL_DIR
+        value: model/saved_model
+      - key: POLL_INTERVAL
+        value: "60"
