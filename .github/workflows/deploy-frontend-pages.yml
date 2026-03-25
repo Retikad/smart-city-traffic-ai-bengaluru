@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      REACT_APP_API_BASE: ${{ vars.REACT_APP_API_BASE }}
 
     steps:
       - name: Checkout

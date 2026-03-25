@@ -92,14 +92,21 @@ This repo is configured to auto-deploy the React frontend using GitHub Actions.
 2. In GitHub, open your repository settings:
   - `Settings` -> `Pages`
   - Under `Build and deployment`, set `Source` to `GitHub Actions`.
-3. The workflow `.github/workflows/deploy-frontend-pages.yml` will:
-  - install dependencies from `smart_traffic/frontend`
+3. In GitHub, set repository variable for production API:
+  - `Settings` -> `Secrets and variables` -> `Actions` -> `Variables`
+  - Add variable `REACT_APP_API_BASE` with your deployed backend URL (example: `https://your-backend-domain`)
+4. The workflow `.github/workflows/deploy-frontend-pages.yml` will:
+  - install dependencies from `frontend`
   - build the app
-  - publish `smart_traffic/frontend/build` to GitHub Pages
+  - publish `frontend/build` to GitHub Pages
 
 After the workflow succeeds, your frontend will be available at:
 
 https://retikad.github.io/smart-city-traffic-ai-bengaluru/
+
+For backend CORS, include your frontend origin in backend `.env`:
+
+`CORS_ALLOW_ORIGINS=http://localhost:3000,https://retikad.github.io`
 
 ### 3) Verify Services
 - Health check: http://localhost:8000/health
