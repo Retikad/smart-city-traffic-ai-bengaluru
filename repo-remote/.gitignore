@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environments
+.venv/
+venv/
+
+# Secrets
+backend/.env
+frontend/.env
+
+# Databases and generated artifacts
+*.db
+backend/model/training_data/
+backend/model/saved_model/
+
+# Node
+frontend/node_modules/
+frontend/build/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/

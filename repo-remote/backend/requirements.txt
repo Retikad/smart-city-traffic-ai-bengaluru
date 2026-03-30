@@ -1,0 +1,10 @@
+fastapi==0.115.5
+uvicorn==0.32.0
+sqlalchemy==2.0.36
+pydantic==2.9.2
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+tensorflow==2.17.0
+python-dotenv==1.0.1
+requests==2.32.3
